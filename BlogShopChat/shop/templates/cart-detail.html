@@ -1,0 +1,163 @@
+{% extends "base_shop.html" %}
+
+
+{% block slider %}
+<div class="">
+  <h3>شماره ی سفارش :{{ cart.order_number }}</h3>
+  <hr>
+</div>
+
+
+{% endblock slider %}
+
+
+{% block content %}
+<div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+
+
+<div class="col-sm-12 col-md-12">
+  <div class="thumbnail">
+          <p></p>
+          <br>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><p class="card-text"><small class="text-muted">تغییر وضعیت :<b><button class="btn btn-{{color}} pull-left" value="{{ value }}" onclick="change(this)" status="{{ status }}" id="status">
+                {{ word }}
+             </button></small></p></li>
+            <li class="list-group-item"><p class="card-text"><small class="text-muted">اسم خریدار :<b>{{cart.customer.username}}</small></p></li>
+
+            <li class="list-group-item"><p class="card-text"><small class="text-muted">قیمت پرداختی :<b>{{cart.paid_amount}}</small></p></li>
+          
+            </ul>
+
+      <div class="card-footer text-muted text-center">
+         تاریخ ایجاد :{{ cart.created_at }}
+      </div>
+      {% if cart.paid_date %}
+      <hr>
+      <div class="card-footer text-muted text-center">
+        تاریخ پرداخت :{{ cart.paid_date }}
+     </div>
+     {% endif %}
+  </div>
+</div>
+
+  
+
+
+
+
+<div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+
+    <div class="col-md 12">
+
+
+
+            <div class="site-blocks-table thumbnail">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="product-thumbnail">عکس محصول</th>
+                            <th class="product-name">نام محصول</th>
+                            <th class="product-price">قیمت</th>
+                            <th class="product-quantity">تعداد</th>
+                            <th class="product-remove">حذف کردن</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>{% for item in items %}
+                            {% with product=item.product %}
+                        <tr>
+                            <td class="product-thumbnail">
+                                <img src="{{ product.get_thumbnail_default }}" alt="Image" class="img-fluid">
+                            </td>
+                            <td class="product-name">
+                                <h2 class="h5 text-black">{{ product.name }}</h2>
+                            </td>
+                            <td> {{ item.price }} ریال</td>
+                            <td> {{ item.quantity }}
+                            </td>
+                            <td><form action="" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" name="cart_id" value="{{ item.pk }}"
+                                    class="btn btn-primary btn-sm">X</button></form></td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+    </div>
+</div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+<script>
+
+
+function change(that) {
+            btn = that.closest("button")
+            console.log(btn)
+            if (btn.getAttribute('status') == "Pending") {
+                btn.innerHTML = 'پرداخت شده'
+                btn.setAttribute('status', 'Paid')
+                btn.setAttribute('value', 'PID')
+                btn.classList.remove("btn-warning");
+                btn.classList.add("btn-success");
+            } else if (btn.getAttribute('status') == "Paid") {
+                btn.innerHTML = 'کنسل شده'
+                btn.setAttribute('status', 'Canceled')
+                btn.setAttribute('value', 'CNL')
+                btn.classList.remove("btn-success");
+                btn.classList.add("btn-danger");
+            } else if (btn.getAttribute('status') == "Canceled") {
+                btn.innerHTML = 'تاییده شده'
+                btn.setAttribute('status', 'Confirmed')
+                btn.setAttribute('value', 'CFD')
+                btn.classList.remove("btn-danger");
+                btn.classList.add("btn-primary");
+            } else {
+                btn.innerHTML = 'در حال پردازش'
+                btn.setAttribute('status', 'Pending')
+                btn.setAttribute('value', 'PND')
+                btn.classList.remove("btn-primary");
+                btn.classList.add("btn-warning");
+            }
+
+
+
+        }
+
+</script>
+<script>
+    $("#status").click(function () {
+        console.log('-----', $(this).attr('value'))
+      var status = $(this).attr('value');
+
+      $.ajax({
+        url: '{% url "change-status" %}',
+        data: {
+          'status': status,
+          'cartid': '{{ cart.id }}'
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.is_taken) {
+            alert("وضعیت سبد خرید تغییر کرد");
+          }
+        }
+      });
+
+    });
+  </script>
+
+
+{% endblock content %}
+
+
+
+
+
+
+

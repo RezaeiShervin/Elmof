@@ -1,0 +1,234 @@
+{% extends "base_weblog.html" %}
+{% load widget_tweaks %}
+{% block title %}
+{{ post.title }}
+{% endblock title %}
+
+{% block header %}
+{% endblock header %}
+
+{% block slider %}
+<div class="col-sm-12 col-md-12">
+  <div class="">
+      <div style="background-color: mintcream !important;" class="caption">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h2 class="card-text" style="color: #428bca;">{{ post.title }}</h2></li>
+          </ul>
+      </div>
+      <div  class="text-left">
+        نوشته شده توسط : {{ post.posted_by }}
+      </div>
+      <div class=" text-left mt-2 mb-2">
+        {{post.post_date}}
+      </div>
+  </div>
+</div>
+{% endblock slider %}
+
+{% block content %}
+
+<div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+
+  <div class="col-sm-12 col-md-12">
+    <div class="thumbnail">
+        <img src="{{MEDIA_URL}}{{ post.pic }}" alt="...">
+        <div class="caption mt-2">
+            <p>{{ post.bodytext }}</p>
+        </div>
+        <div class="caption mt-2">
+          {% for tag in tags %}
+          <a class="badge bg-secondary text-decoration-none link-light" href="{% url 'post-tag' tag.id %}">{{tag.name}}</a>
+          {% endfor %}
+
+          <form class="pull-left" action="{% url 'like_post' post.slug %}" method="POST">
+            {% csrf_token %}
+            {% if liked %}
+            <button type="submit", name="post_slug", value="{{ post.id }}", class="btn">                                    <span class="fa-stack fa-fw stats-icon">
+              <i class="fa fa-circle fa-stack-2x text-danger"></i>
+              <i class="fa fa-heart fa-stack-1x fa-inverse t-plus-1"></i>
+              </span>پسندیده ام</button> 
+            </form>
+            {% else %}
+            <button type="submit", name="post_slug", value="{{ post.id }}", class="btn btn-link">                                    <span class="fa-stack fa-fw stats-icon">
+              <i class="fa fa-circle fa-stack-2x text-danger"></i>
+              <i class="fa fa-heart fa-stack-1x fa-inverse t-plus-1"></i>
+              </span>میپسندم</button> 
+            {% endif %}
+          </form>
+
+        </div>
+        <hr>
+       <div class="row">
+          <div class="col-md-12 pb-2">
+            <a href="javascript:;" class="m-r-15 text-inverse-lighter pull-right"><i class="fa fa-comments fa-fw fa-lg m-r-3"></i> نظرات {{ comment_count }}</a> 
+            <a href="javascript:;" class="m-r-15 text-inverse-lighter pull-left"><i class="fa fa-thumbs-up fa-fw fa-lg m-r-3"></i> لایک {{ total_likes }}</a>
+           </div>
+           <br>
+           <hr>
+       </div>
+      
+       
+    </div>
+  
+  <br>
+  <div style="background-color: darkgray;" class="col-sm-12 col-md-12 mt-2">
+    {% if user.is_authenticated %}
+    <div class="row">
+      <br>
+      <div class="col-md-10 pull-left mt-2">
+    <form action="" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        {{ form.body|attr:"rows:20"|attr:"cols:20"|attr:"class:form-control"|attr:"id:InputUser" }}
+        <small id="UserlHelp" class="form-text text-muted"></small> 
+      </div>
+    </div>
+    <div class="col-md-2 pull-right">
+      <button type="submit" class="btn btn-primary">ثبت نظر</button>
+    </div>
+  </form>
+</div>
+    {% endif %}
+
+
+  </div>
+  <br>
+  <div style="background-color: lightgoldenrodyellow;" class="col-sm-12 col-md-12 thumbnail mt-2">
+
+    {% if comment_count > 0 %}
+    {% for com in comment %}
+    <div class="row">
+
+       <div class="col-md-12">
+
+         <div class="col-md-3 pull-left">
+           <span class="text-muted">{{ com.created }}</span>
+         </div>
+         <div class="col-md-8 pull-right">
+           <p><b>{{ com.name }} میگه :</b></p>
+           <br>
+           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {{ com.body }}
+         </div>
+
+       </div>
+     </div>
+     <br>
+       <div style="border-bottom: black solid 1px; padding-top: 2px;" class="row">
+         <div style="direction: ltr;" class="col-md-12">
+         <form action="{% url 'like_comment' id=com.id %}" method="POST">
+           {% csrf_token %}
+           <button type="submit", name="comment_id", value="{{ com.id }}", class="btn btn-link"><i class="fa fa-thumbs-up fa-fw fa-sm m-r-3"></i></button>({{ com.total_likes }})
+           </form>
+         </div>
+
+       </div>
+       <br>
+       <br>
+       {% endfor %}
+       {% endif %}
+
+       {% if comment.has_other_pages %}
+       <ul class="pagination">
+         {% if comment.has_previous %}
+           <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+         {% else %}
+           <li class="disabled"><span>&laquo;</span></li>
+         {% endif %}
+         {% for i in comment.paginator.page_range %}
+           {% if users.number == i %}
+             <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+           {% else %}
+             <li><a href="?page={{ i }}">{{ i }}</a></li>
+           {% endif %}
+         {% endfor %}
+         {% if comment.has_next %}
+           <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+         {% else %}
+           <li class="disabled"><span>&raquo;</span></li>
+         {% endif %}
+       </ul>
+     {% endif %}
+</div>
+  <br>
+ 
+
+</div>
+</div>
+
+
+
+{% endblock content %}
+
+{% block sidebar %}
+{% if user.is_authenticated and user == post.posted_by %}
+<div class="list-group bg-dark">
+  {% if user.is_authenticated and user == post.posted_by and post.status == 'DRF' %}
+      <form action="{% url 'change_status_post' post.slug %}" method="POST">
+        {% csrf_token %}
+        <button type="submit", name="status", value="{{ post.slug }}", class="btn btn-link"><a href="#" style="color:red !important;" class="list-group-item">
+          <h4 class="list-group-item-heading">انتشار پست</h4>
+          <p class="list-group-item-text"></p>
+        </a></button>
+      </form> 
+{% endif %}
+
+
+
+  <a href="{% url 'delete-post' slug=post.slug %}" style="color:red !important;" class="list-group-item">
+      <h4 class="list-group-item-heading">حذف پست</h4>
+      <p class="list-group-item-text"></p>
+  </a>
+
+
+  <a href="{% url 'edit_post' slug=post.slug %}" style="color:yellow !important;" class="list-group-item">
+      <h4 class="list-group-item-heading">ویرایش پست</h4>
+      <p class="list-group-item-text">
+      </p>
+  </a>
+</div>
+{% endif %}
+
+{% if user.is_authenticated %}
+<div class="list-group">
+
+
+  <a href="{% url 'new_post' %}" class="list-group-item">
+      <h4 class="list-group-item-heading">ایجاد پست جدید</h4>
+      <p class="list-group-item-text">
+          ازین قسمت میتوانید پست جدیدی را ایجاد کنید
+      </p>
+  </a>
+
+  <a href="{% url 'add-cat-tag' %}" class="list-group-item">
+      <h4 class="list-group-item-heading">ایجاد دسته بندی و تگ</h4>
+      <p class="list-group-item-text">شما میتوانید یک دسته بندی جدید یا تگی را ایجاد کنید</p>
+  </a>
+</div>
+{% endif %}
+
+  <div class="list-group">
+    <a href="#" class="list-group-item active">
+      دسته بندی ها
+    </a>
+    {% for cat in category %}
+      <a href="{{cat.get_absolute_url}}" class="list-group-item">
+        <span class="badge">{{ cat.count_post }}</span> {{cat.name}}
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="list-group">
+    <a href="#" class="list-group-item active">
+      تگ ها
+    </a>
+    {% for item in tag %}
+      <a href="{% url 'post-tag' item.id %}" class="list-group-item">
+        <span class="badge">{{ item.count_post }}</span> {{item.name}}
+      </a>
+    {% endfor %}
+  </div>
+
+
+
+{% endblock sidebar %}
+

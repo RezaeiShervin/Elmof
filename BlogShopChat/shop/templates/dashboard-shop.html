@@ -1,0 +1,216 @@
+{% extends "base_shop.html" %}
+{% block title %}
+Dashboard
+{% endblock title %}
+
+{% block header %} عزیز خوش آمدید ! {{ user.username }}
+<hr>
+{% endblock header %}
+
+{% block slider %}
+{% if shop %}
+<div class="">
+  <h3>فروشگاه های شما :</h3>
+  <hr>
+</div>
+{% else %}
+<div class="">
+  <h3>شما هیچ فروشگاه فعالی ندارید </h3>
+  <hr>
+</div>
+{% endif %}
+
+{% endblock slider %}
+
+
+{% block content %}
+<div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+{% if shop %}
+{% for item in shop %}
+
+<div class="col-sm-12 col-md-12">
+  <div class="thumbnail">
+          <h3 style="color: #428bca;">{{item.name}}</h3>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><p class="card-text"><small class="text-muted">نوع فروشگاه :<b>{{item.type}}</small></p></li>
+          </ul>
+          <p><a href="{{ item.get_absolute_url }}">جزییات</a></p>
+      <div class="card-footer text-muted text-center">
+        {{post.post_date}}
+      </div>
+  </div>
+</div>
+<br>
+
+  {% if forloop.counter|divisibleby:3 %}
+  </div>
+  <div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+  {% endif %}
+
+
+{% endfor %}
+
+{% elif have_shop_pending %}
+<div class="col-md-12">
+
+<p> فروشگاه شما در انتظار تایید است </p>
+
+</div>
+{% else %}
+<hr>
+<button type="button" class="btn  btn-sm btn-success"><a href="{% url 'create-shop' %}" style="color:black ; text-decoration: none;" !important>ایجاد فروشگاه </a></button>
+{% endif %}
+</div>
+
+{% if is_paginated %}
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in paginator.page_range %}
+      {% if page_obj.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+
+<div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+
+    <div class="col-md 12">
+
+<h3>محصولات شما :</h3>
+
+    </div>
+    <hr>
+    <br>
+{% for item in product %}
+<div class="col-sm-4 col-md-4">
+  <div class="thumbnail">
+      <img src="{{ item.get_default }}" alt="...">
+      <div class="caption">
+          <h3 style="color: #428bca;">{{item.name}}</h3>
+          <p>{{ item.description|truncatewords:30 }}</p>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><p class="card-text"><small class="text-muted">قیمت :<b>{{item.price}}</small></p></li>
+          </ul>
+          <p><a href="{% url 'product-detail' slug=item.slug %}">جزییات محصول</a></p>
+      </div>
+      <div class="card-footer text-muted text-center">
+        تعداد : {{ item.quantity }}
+      </div>
+  </div>
+</div>
+
+{% if forloop.counter|divisibleby:3 %}
+  </div>
+  <div class="row" style="margin-top: 10px; margin-bottom: 10px;">
+{% endif %}
+
+{% endfor %}
+{% if shop.has_other_pages %}
+  <ul class="pagination">
+    {% if shop.has_previous %}
+      <li><a href="?page={{ posts_published.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in shop.paginator.page_range %}
+      {% if shop.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if shop.has_next %}
+      <li><a href="?page={{ posts_published.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+</div>
+
+
+
+
+
+{% endblock content %}
+
+
+
+{% block sidebar %}
+{% if have_shop_pending %}
+<div class="list-group thumbnail">
+  <a href="#" class="list-group-item active">
+    در انتظار تایید
+  </a>
+{% for i  in shop_pending  %}
+  <a href={{ i.get_absolute_url }} class="list-group-item">
+    <h4 class="list-group-item-heading">{{i.name}}</h4>
+    <p class="list-group-item-text">
+        <a class="badge bg-secondary text-decoration-none link-light" href="#">{{i.type}}</a>
+    </p>
+</a>
+{% endfor %}
+</div>
+{% endif %}
+
+
+
+<div class="list-group">
+  <a href="{% url 'edit_profile' %}" class="list-group-item">
+      <h4 class="list-group-item-heading">ویرایش پروفایل</h4>
+      <p class="list-group-item-text">شما میتوانید اسم کاربری و رمز عبور و ... خود را تغییر دهید</p>
+  </a>
+
+{% if have_shop_pending == False %}
+  <a href="{% url 'create-shop' %}" class="list-group-item">
+      <h4 class="list-group-item-heading">ایجاد فروشگاه جدید</h4>
+      <p class="list-group-item-text">
+          ازین قسمت میتوانیدفروشگاه جدیدی را ایجاد کنید
+      </p>
+  </a>
+{% endif %}
+
+  <a href="{% url 'add-type-category' %}" class="list-group-item">
+      <h4 class="list-group-item-heading">ایجاد دسته بندی و تگ</h4>
+      <p class="list-group-item-text">شما میتوانید یک دسته بندی جدید یا تگی را ایجاد کنید</p>
+  </a>
+</div>
+
+  <div class="list-group">
+    <a href="#" class="list-group-item active">
+     فیلتر بر اساس دسته بندی 
+    </a>
+    {% for cat in category %}
+      <a href="{% url 'category-product' slug=cat.slug %}" class="list-group-item">
+        <span class="badge">{{ cat.count_product }}</span> {{cat.name}}
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="list-group">
+    <a href="#" class="list-group-item active">
+      فیلتر بر اساس نوع فروشگاه
+    </a>
+    {% for item in types %}
+      <a href="{% url 'type-shop' slug=item.slug %}" class="list-group-item">
+        <span class="badge">{{ item.count_shop }}</span> {{item.name}}
+      </a>
+    {% endfor %}
+  </div>
+
+
+{% endblock sidebar %}
+
+

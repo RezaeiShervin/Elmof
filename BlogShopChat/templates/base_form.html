@@ -1,0 +1,54 @@
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-rtl.css' %}" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="{% static 'Scripts/jquery-1.10.2.min.js' %}"></script>
+    <script src="{% static 'Scripts/bootstrap-rtl.js' %}"></script>
+</head>
+
+<body>
+
+
+	{% if messages %}
+    {% for message in messages %}
+		{% if message.tags %}
+			<div class="alert alert-{{ message.tags }}alert-dismissible fade show" role="alert">
+		{% endif %}
+  			<strong> </strong> {{ message }}
+  			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    		<span aria-hidden="true">&times;</span>
+  			</button>
+			</div>
+	{% endfor %}
+	{% endif %}
+
+
+    <div class="headder">
+        <h1>{% block header %}{% endblock header %}</h1>
+    </div>
+    <div class="container">
+        <div id="header" class="row">
+            
+        </div>
+        <div class="row" style="margin-top: 62px">
+
+            <div id="content" class="col-lg-8 col-md-9 col-sm-6 col-xs-12 pull-left">
+
+			{% block content %}{% endblock content %}
+
+            </div>
+
+        </div>
+    </div>
+
+	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+</body>
+{% include "messages.html" %}
+</html>
